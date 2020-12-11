@@ -1,4 +1,5 @@
 from focus_helpers import (
+    _print_container,
     distance_between,
     get_bottom_midpoint,
     get_left_midpoint,
@@ -89,14 +90,21 @@ async def _on_focus_up(connection: Connection):
     root = await connection.get_tree()
     focused = root.find_focused()
 
-    if focused.rect.y - (inner_gaps + outer_gaps) > focused.root().rect.y:
+    parent: Con = focused.parent
+    if parent.ipc_data["layout"] == "stacked":
+        if focused != parent.nodes[0]:
+            await focused.command("focus up")
 
+    elif focused.rect.y - (inner_gaps + outer_gaps) > focused.root().rect.y:
+        # func used to filter out windows not above the focused window
         def is_above_focused(w: Con) -> bool:
             return (
                 window_is_valid_above(focused.rect, w.rect)
                 and w not in root.scratchpad().descendants()
             )
 
+        # func usedto calculate the distance this window is from
+        # the currently focused window
         def distance_above_focused(w: Con) -> float:
             focused_top_midpoint = get_top_midpoint(focused)
             w_bottom_midpoint = get_bottom_midpoint(w)
@@ -118,12 +126,17 @@ async def _on_focus_down(connection: Connection):
     focused = root.find_focused()
     max_height = focused.workspace().rect.height
 
+    parent: Con = focused.parent
+    if parent.ipc_data["layout"] == "stacked":
+        if focused != parent.nodes[-1]:
+            await focused.command("focus down")
+
     if focused.rect.y + focused.rect.height + inner_gaps + outer_gaps < max_height:
 
         def is_below_focused(w: Con) -> bool:
             return (
                 window_is_valid_below(focused.rect, w.rect)
-                and w not in root.scratchpad().descendents()
+                and w not in root.scratchpad().descendants()
             )
 
         def distance_below_focused(w: Con) -> float:
