@@ -11,10 +11,8 @@ from focus_helpers import (
 )
 from typing import Awaitable, Callable
 from i3ipc.aio.connection import Connection
-from typing import Union, Dict, List
+from typing import Union, Dict
 from i3ipc.con import Con
-import os
-from math import sqrt
 
 
 # FIXME: gaps json not working with i3ipc?
@@ -50,7 +48,6 @@ async def _on_focus_left(connection: Connection):
         )
 
         if len(sorted_windows):
-            _display_windows(focused, sorted_windows)
             await sorted_windows[0].command("focus")
 
 
@@ -85,7 +82,6 @@ async def _on_focus_right(connection: Connection):
 
         # if list ain't empty, pop the best window and focus it
         if len(sorted_windows):
-            _display_windows(focused, sorted_windows)
             await sorted_windows[0].command("focus")
 
 
@@ -114,7 +110,6 @@ async def _on_focus_up(connection: Connection):
         )
 
         if len(sorted_windows):
-            _display_windows(focused, sorted_windows)
             await sorted_windows[0].command("focus")
 
 
@@ -144,7 +139,6 @@ async def _on_focus_down(connection: Connection):
         )
 
         if len(sorted_windows):
-            _display_windows(focused, sorted_windows)
             await sorted_windows[0].command("focus")
 
 
@@ -163,18 +157,3 @@ def get_focus_command(
         return _direction_mapper[direction]
 
     return None
-
-
-def _print_container(con: Con):
-    print(
-        f"name: {con.window_instance}\n   x: {con.rect.x}, y: {con.rect.y}, w: {con.rect.width} h: {con.rect.height}"
-    )
-
-
-def _display_windows(focused: Con, potential_windows: List[Con]):
-    os.system("clear")
-    _print_container(focused)
-    print("\n")
-
-    for c in potential_windows:
-        _print_container(c)

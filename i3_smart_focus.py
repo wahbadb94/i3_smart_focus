@@ -4,15 +4,17 @@ from i3ipc import Event
 import asyncio
 from i3ipc.events import BindingEvent
 from focus_handlers import get_focus_command
-from constants import command_redirector
+from constants import COMMAND_REDIRECTOR
 
 
 def parse_binding_event(
     binding_event: BindingEvent,
 ) -> Union[Callable[[Connection], None], None]:
-    command: str = binding_event.binding.command  # exec i3py_redirect focus left
-    i3_command = command[len(command_redirector) :]  # focus left
-    command_words = i3_command.strip().split(" ")  # ["focus", "left"]
+    # parse the command
+    # exec i3py_redirect focus left --> focus left --> ["focus", "left"]
+    command: str = binding_event.binding.command
+    i3_command = command[len(COMMAND_REDIRECTOR) :]
+    command_words = i3_command.strip().split(" ")
 
     if command_words[0] == "focus":
         focusable = command_words[1]  # "left"
@@ -24,7 +26,7 @@ async def main():
     async def on_binding_event(connection: Connection, binding_event: BindingEvent):
         command: str = binding_event.binding.command
 
-        if command_redirector in command:
+        if COMMAND_REDIRECTOR in command:
             our_command = parse_binding_event(binding_event)
             if our_command is not None:
                 await our_command(connection)

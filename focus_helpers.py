@@ -1,8 +1,8 @@
-import math
 from math import sqrt
-from typing import Tuple
+from typing import List
 from i3ipc.con import Con
 from i3ipc.model import Rect
+import os
 
 
 def is_left_of(reference: Rect, target: Rect) -> bool:
@@ -107,3 +107,45 @@ def distance_between(p1: Point, p2: Point):
     delta_y = abs(p1.y - p2.y)
 
     return sqrt(delta_x ** 2 + delta_y ** 2)
+
+
+# the below functions assume that the parent is in either
+# forizontal or vertical split mode
+def is_leftmost_sibling(window: Con) -> bool:
+    parent: Con = window.parent
+    siblings: List[Con] = parent.nodes
+    return window == sorted(siblings, key=lambda s: (s.rect.x))[0]
+
+
+def is_rightmost_sibling(window: Con) -> bool:
+    parent: Con = window.parent
+    siblings: List[Con] = parent.nodes
+    return window == sorted(siblings, key=lambda s: (-s.rect.x))[0]
+
+
+def is_topmost_sibling(window: Con) -> bool:
+    parent: Con = window.parent
+    siblings: List[Con] = parent.nodes
+    return window == sorted(siblings, key=lambda s: (s.rect.y))[0]
+
+
+def is_bottommost_sibling(window: Con) -> bool:
+    parent: Con = window.parent
+    siblings: List[Con] = parent.nodes
+    sorted_siblings = sorted(siblings, key=lambda s: (-s.rect.y))
+    return window == sorted_siblings[0]
+
+
+def _print_container(con: Con):
+    print(
+        f"name: {con.window_instance}\n   x: {con.rect.x}, y: {con.rect.y}, w: {con.rect.width} h: {con.rect.height}"
+    )
+
+
+def _display_windows(focused: Con, potential_windows: List[Con]):
+    os.system("clear")
+    _print_container(focused)
+    print("\n")
+
+    for c in potential_windows:
+        _print_container(c)
